@@ -1,35 +1,47 @@
-name: Django WebApp CI
+name: Django Practical CI
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
   pull_request:
-    branches: [master]
+    branches: [main, master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.11'  # Compatible with most Django versions
 
-    - name: Install dependencies
+    - name: Install dependencies (if requirements.txt exists)
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        if [ -f "requirements.txt" ]; then
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        else
+          echo "No requirements.txt found — skipping dependency installation."
+        fi
+
+    - name: Set version info
+      id: version
+      run: |
+        VERSION=$(git describe --tags --always --dirty)
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
     - name: Zip project folder
       run: |
-        zip -r django-webapp.zip . -x "*.git*" "*.venv*" "__pycache__*" "*.pytest_cache*" "*.mypy_cache*"
+        ZIP_NAME="django-webapp-${{ steps.version.outputs.version }}.zip"
+        zip -r "$ZIP_NAME" . -x "*.git*" "*.venv*" "__pycache__*" "*.pytest_cache*" "*.mypy_cache*"
+        echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: django-webapp
-        path: django-webapp.zip
+        name: ${{ env.ZIP_NAME }}
+        path: ${{ env.ZIP_NAME }}
