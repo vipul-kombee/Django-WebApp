@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -29,7 +29,7 @@ jobs:
         zip -r django-webapp.zip . -x "*.git*" "*.venv*" "__pycache__*" "*.pytest_cache*" "*.mypy_cache*"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: django-webapp
         path: django-webapp.zip
